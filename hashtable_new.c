@@ -1,7 +1,7 @@
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/init.h>
-#include <linux/hashtable.h>
+#include "hashtable.h"
 #include <linux/slab.h>
 #include <linux/timekeeping.h>
 #include <linux/ktime.h>
@@ -10,7 +10,7 @@
 
 //this file contains the example code for using our reconstructed hashtable,
 //which may be faster if the collision occurs too much.
-int num_to_test[3] = {1000, 10000, 100000};
+int num_to_test[4] = {1000, 10000, 100000, 1000000};
 
 struct my_node {
 	u32 key;
