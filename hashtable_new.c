@@ -6,9 +6,10 @@
 #include <linux/timekeeping.h>
 #include <linux/ktime.h>
 
-#define MY_HASH_BITS 4
+#define MY_HASH_BITS 2
 
-//this file contains the example code for testing original hashtable in linux kernel
+//this file contains the example code for using our reconstructed hashtable,
+//which may be faster if the collision occurs too much.
 int num_to_test[3] = {1000, 10000, 100000};
 
 struct my_node {

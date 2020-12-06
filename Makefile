@@ -1,4 +1,4 @@
-obj-m := hash.o
+obj-m := hashtable.o
 
 KERNEL_DIR := /lib/modules/$(shell uname -r)/build
 PWD := $(shell pwd)
