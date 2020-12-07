@@ -11,7 +11,7 @@
 
 //this file contains the example code for using our reconstructed hashtable,
 //which may be faster if the collision occurs too much.
-int num_to_test[4] = {100, 1000, 10000, 100000};
+int num_to_test[5] = {10, 100, 1000, 10000, 100000};
 
 struct my_node {
 	int value;
@@ -74,7 +74,7 @@ void hash_example(void)
 			//printk(KERN_INFO "value=%d, key=%d is in member=30\n", nptr->value, nptr->hnode.key);
 			//printk("value=%d, key=%d is in member=30\n", nptr->value, nptr->hrb_node.key);
 		tend = ktime_get();
-		printk("hash_for_each_possible, %d) %llu ns\n", 2*num_to_test[i], ktime_to_ns(tend - tbegin));
+		printk("hash_for_each_possible, %d) %llu ns\n", num_to_test[i], ktime_to_ns(tend - tbegin));
 		printk(KERN_INFO "end search test\n");
 		printk(KERN_INFO "begin deletion test");
 		//delete

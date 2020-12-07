@@ -9,7 +9,7 @@
 #define MY_HASH_BITS 4
 
 //this file contains the example code for testing original hashtable in linux kernel
-int num_to_test[4] = {100, 1000, 10000,100000};
+int num_to_test[5] = {10, 100, 1000, 10000, 100000};
 
 struct my_node {
 	u32 key;
@@ -19,7 +19,7 @@ struct my_node {
 
 void hash_example(void)
 {
-	int i, j, k;
+	int i, j;
 	int bkt;
 	ktime_t tbegin, tend;
 	struct my_node* nptr;
