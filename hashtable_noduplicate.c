@@ -11,7 +11,7 @@
 
 //this file contains the example code for using our reconstructed hashtable,
 //which may be faster if the collision occurs too much.
-int num_to_test[4] = {1000, 10000, 100000, 1000000};
+int num_to_test[4] = {10000, 100000, 1000000, 1000000};
 
 struct my_node {
 	int value;
@@ -58,14 +58,17 @@ void hash_example(void)
 		printk(KERN_INFO "iter, %d) %llu ns\n",2*num_to_test[i], ktime_to_ns(tend - tbegin));
 		printk(KERN_INFO "\thash_for_each_possible test\n");
 		tbegin = ktime_get();
-		hash_rbtree_for_each_possible(my_hash, rptr, 30){
+		for(j=0;j<num_to_test[i];j++){
+			for(k=0;k<2;k++){
+				hash_rbtree_possible(my_hash, j * 10 + k);
+			}
+		}
 			//iterate every node in hashtable my_hash that may contain key==30(?)
 			//and store the pointer to the node onto nptr
 			//hnode is required to calculate the position of hlist_node in my_node structure.
 			
 			//printk(KERN_INFO "value=%d, key=%d is in member=30\n", nptr->value, nptr->hnode.key);
 			//printk("value=%d, key=%d is in member=30\n", nptr->value, nptr->hrb_node.key);
-		}
 		tend = ktime_get();
 		printk("hash_for_each_possible, %d) %llu ns\n", 2*num_to_test[i], ktime_to_ns(tend - tbegin));
 		printk(KERN_INFO "end search test\n");

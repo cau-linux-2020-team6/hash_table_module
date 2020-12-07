@@ -59,14 +59,17 @@ void hash_example(void)
 		printk("hash_for_each, %d) %llu ns\n", 2*num_to_test[i], ktime_to_ns(tend - tbegin));
 		printk("\thash_for_each_possible test\n");
 		tbegin = ktime_get();
-		hash_for_each_possible(my_hash, nptr, hnode, 30){
+		for(j=0;j<num_to_test[i];j++){
+			hash_for_each_possible(my_hash, nptr, hnode, j * 10){
+			}
+		}	
 			//iterate every node in hashtable my_hash that has been inserted on the bucket with the node whose key==30
 			//and store the pointer to the node onto nptr
 			//hnode is required to calculate the position of hlist_node in my_node structure.
 			
 			//printk(KERN_INFO "value=%d, key=%d is in member=30\n", nptr->value, nptr->key)
 			//printk("value=%d, key=%d is in member=30\n", nptr->value, nptr->key);
-		}
+		
 		tend = ktime_get();
 		printk("hash_for_each_possible, %d) %llu ns\n", 2*num_to_test[i], ktime_to_ns(tend - tbegin));
 		printk("end search test\n");

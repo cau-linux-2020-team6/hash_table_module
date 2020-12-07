@@ -113,7 +113,7 @@ struct rb_node* rb_search(u32 key, struct rb_node* root)
  * @key: the key of the objects to iterate over
  */
 #define hash_rbtree_possible(name, key) \
-	rb_search((key), &name[hash_min(key, HASH_BITS(name))]->rb_node)
+	rb_search((key), name[hash_min(key, HASH_BITS(name))].rb_node)
 
 #define hash_rbtree_for_each_possible(name, rptr, key) \
 	for((rptr)=rb_first(bucket_for((name), (key)));(rptr)!=NULL;(rptr)=rb_next((rptr)))
