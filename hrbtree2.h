@@ -13,18 +13,24 @@
 #include <linux/hash.h>
 #include <linux/rbtree.h>
 #include <linux/rculist.h>
+#include <linux/slab.h>
 
 struct hrb_head{
+	struct rb_root head;
+	struct list_head eqhead;
+};
+
+struct hrb_node{
 	struct rb_node node;
 	struct list_head eqhead;
 	u32 key;
-}
+};
 
-#define DEFINE_HASHTABLE(name, bits)						\
+#define DEFINE_HRBTABLE(name, bits)						\
 	struct hrb_head name[1 << (bits)]
 
-#define DECLARE_HASHTABLE(name, bits)                                   	\
-	DEFINE_HASHTABLE(name, bits)
+#define DECLARE_HRBTABLE(name, bits)                                   	\
+	DEFINE_HRBTABLE(name, bits)
 
 
 /**
@@ -33,14 +39,14 @@ struct hrb_head{
  * @node: the &struct hlist_node of the object to be added
  * @key: the key of the object to be added
  */
-static inline void hrb_add_head(struct hrb_head *n, u32 key, struct hrb_head *h)
+static inline void hrb_add_head(struct hrb_node *n, u32 key, struct hrb_head *h)
 {
-	struct rb_node**   curr = &(h->node->rb_node);
+	struct rb_node**   curr = &(h->head.rb_node);
 	struct rb_node*  parent = NULL;
 	struct hrb_head* new_node = NULL;
 	u32 curr_key;
 	while(*curr){
-		curr_key = rb_entry(*curr, struct hrb_head, node)->key;
+		curr_key = rb_entry(*curr, struct hrb_node, node)->key;
 		if(curr_key < key){
 			curr = &((*curr)->rb_right);
 		}
@@ -49,22 +55,22 @@ static inline void hrb_add_head(struct hrb_head *n, u32 key, struct hrb_head *h)
 		}
 		else{
 			//item with same key exists. linked list will be used here.
-			while(!rb_entry(*curr, struct hrb_head, node)->eq == NULL){
+			while(rb_entry(*curr, struct hrb_node, node)->eqhead != NULL){
 				parent = *curr;
-				curr = &(rb_entry(*curr, struct hrb_head, node)->eq->node->rb_node);
+				curr = &(rb_entry(*curr, struct hrb_node, node)->eqhead.node->rb_node);
 			}
-			new_node = kmalloc(sizeof(struct hrbtree_node), GFP_KERNEL);
+			new_node = kmalloc(sizeof(struct hrb_node), GFP_KERNEL);
 			if(!new_node){
 				printk("Unable to malloc new node");
 				return;
 			}
 			new_node->key = key;
-			list_add(new_node->eqhead, rb_entry(parent, struct hrb_head, node));
+			list_add(new_node->eqhead, rb_entry(parent, struct hrb_node, node));
 			return;
 		}
 	}
 	//item with same key does not exist. initialize hrbtree_node and expand rbtree.
-	new_node = kmalloc(sizeof(struct hrbtree_node), GFP_KERNEL);
+	new_node = kmalloc(sizeof(struct hrb_node), GFP_KERNEL);
 	if(!new_node){
 		printk("Unable to malloc new node");
 		return;
@@ -81,21 +87,20 @@ static inline void hrb_add_head(struct hrb_head *n, u32 key, struct hrb_head *h)
 	hrb_add_head(node, &hashtable[hash_min(key, HASH_BITS(hashtable))])
 
 
-
-
-
-
-
-
-
-
 /**
  * hash_del - remove an object from a hashtable
  * @node: &struct hlist_node of the object to remove
  */
-static inline void hash_del(struct hlist_node *node)
+static inline void hash_del(struct list_head *node, struct hrb_head* hashtable)
 {
+	list_head* next = node->next;
+	u32 key;
 	hlist_del_init(node);
+	if(list_empty(next)){
+		//rb_node is empty. need to remove and rearrange rbtree.
+		key = list_entry(node, struct hrb_head, eqhead)->key;
+		//hashtable[hash_min(key, HASH_BITS(hashtable))]->node
+	}
 }
 
 /*
@@ -140,7 +145,7 @@ static inline void hash_del(struct hlist_node *node)
  * same bucket safe against removals
  * @name: hashtable to iterate
  * @obj: the type * to use as a loop cursor for each entry
- * @tmp: a &struct used for temporary storage
+ * @tmp: a &struct used for temporary storage+
  * @member: the name of the hlist_node within the struct
  * @key: the key of the objects to iterate over
  */
