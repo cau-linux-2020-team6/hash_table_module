@@ -85,7 +85,7 @@ void hash_example(void)
 			kfree(nptr);
 		}
 		tend = ktime_get();
-		printk(KERN_INFO "delete, %d) %llu ns\n",2*num_to_test[i], ktime_to_ns(tend - tbegin));
+		printk(KERN_INFO "delete, %d) %llu ns\n",num_to_test[i], ktime_to_ns(tend - tbegin));
 		printk(KERN_INFO "end deletion test");
 	}
 }
