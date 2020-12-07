@@ -24,7 +24,48 @@
  
  linux/hashtable.h를 수정해서 만든 헤더파일이다.
  
+ struct hrb_node를 정의했다. 기본적으로는, 기존에 이미 존재하는 rbtree를 사용하는 형태가 된다.
+ 
+    struct hrb_node{
+        struct rb_node node;
+        u32 key;
+    }
+ node는 rb node를, key는 hashtable에 삽입하는데 사용된 키를 의미한다. key는 rbtree를 정렬하는데도 사용된다.
+ 
+ 아래는 지원 함수의 목록이다.
+ 
+     #define DEFINE_HASHTREE(name, bits)
+         //새로운 hash rbtree를 생성하고, 초기화함.
+     #define DECLARE_HASHTABLE(name, bits)
+         //새로운 hash rbtree를 생성하되, 초기화는 하지 않음.
+     #define hashrbtree_init(hashtable)
+         //이미 생성된 해시 테이블을 초기화.
+     void hashrbtree_add(struct rb_root* hashtable, struct hrb_node* node, int hash_bits)
+        //hashtable에 새로운 노드를 삽입.
+    void hashrbtree_del(struct rb_root* node)
+        //해시테이블의 인덱스 하나를 붕괴시킴.
+    #define bucket_for(name, key)
+        &name[hash_min(key, HASH_BITS(name))]
+        //특정 키를 가진 노드가 삽입될 테이블의 엔트리의 주소를 가져옴.
+    
+아래는 데이터 열거에 쓰일만한 매크로 목록이다.
 
+    #define hash_rbtree_for_each(name, bkt, iter)
+        @name: 순회할 해시 rb테이블
+        @bkt: 해시 rb테이블을 하나씩 순회하기 위한 정수형 임시변수
+        @iter: rb_node*형 포인터. rb_entry()를 통해, 포인터가 가리키는 원본 데이터 영역에 접근할 수 있다.
+    
+    #define hash_rbtree_for_each_possible(name, rptr, key)
+        @name: 순회할 해시 rb테이블
+        @rptr: rb_node*형 포인터.
+        @key: 순회할 키값.
+        //키가 정확히 일치하는 데이터 뿐만 아니라, 해시 rb테이블에서 같은 엔트리에 담긴 모든 노드를 가져온다.
+        
+    #define hash_rbtree_possible(name, key)
+        @name: 순회할 해시 rb테이블
+        @key: 찾을 키값
+        //키가 정확히 일치하는 데이터를 찾는다. 찾는다면 rb_node*형을 반환하고, 찾지 못한다면 NULL을 반환한다.
+    
 # 테스트용 코드
 
 hashtable.c는 기존 리눅스 커널의 hashtable구조를 이용한다.
