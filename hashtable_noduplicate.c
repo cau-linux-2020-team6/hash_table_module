@@ -11,7 +11,7 @@
 
 //this file contains the example code for using our reconstructed hashtable,
 //which may be faster if the collision occurs too much.
-int num_to_test[4] = {10000, 100000, 1000000, 1000000};
+int num_to_test[4] = {100, 1000, 10000, 100000};
 
 struct my_node {
 	int value;
@@ -36,13 +36,13 @@ void hash_example(void)
 		for(j=0;j<num_to_test[i];j++){
 			for(k=0;k<2;k++){
 				struct my_node *new = kmalloc(sizeof(struct my_node), GFP_KERNEL);
-				new->value = j * 10 + k;
-				new->hnode.key = j * 10 + k;
+				new->value = j;
+				new->hnode.key = j * 10;
 				hashrbtree_add(my_hash, &new->hnode, MY_HASH_BITS);
 			}
 		}
 		tend = ktime_get();
-		printk(KERN_INFO "insert, %d) %llu ns\n",2*num_to_test[i], ktime_to_ns(tend - tbegin));
+		printk(KERN_INFO "insert, %d) %llu ns\n",num_to_test[i], ktime_to_ns(tend - tbegin));
 		printk(KERN_INFO "end insertion test\n");
 		printk(KERN_INFO "begin search test\n");
 		printk(KERN_INFO "\thash_for_each test\n");
@@ -55,12 +55,16 @@ void hash_example(void)
 			//printk(KERN_INFO "value=%d, key=%d is in bucket %d\n", nptr->value, nptr->hnode.key, bkt);
 		}
 		tend = ktime_get();
-		printk(KERN_INFO "iter, %d) %llu ns\n",2*num_to_test[i], ktime_to_ns(tend - tbegin));
+		printk(KERN_INFO "iter, %d) %llu ns\n",num_to_test[i], ktime_to_ns(tend - tbegin));
 		printk(KERN_INFO "\thash_for_each_possible test\n");
 		tbegin = ktime_get();
 		for(j=0;j<num_to_test[i];j++){
 			for(k=0;k<2;k++){
-				hash_rbtree_possible(my_hash, j * 10 + k);
+				//k={0,1}: 원본 테스트 코드에서는 리스트를 쓰는데,
+				//길이가 N인 리스트에서 특정 노드를 찾기 위해 봐야 하는 노드의 수의 기댓값이
+				//N/2로, 두배의 패널티를 기본적으로 받고 있으므로 여기에도 두배를 해줘야
+				//공평한 비교가 가능하다.
+				hash_rbtree_possible(my_hash, j * 10);
 			}
 		}
 			//iterate every node in hashtable my_hash that may contain key==30(?)

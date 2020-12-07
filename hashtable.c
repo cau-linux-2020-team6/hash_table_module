@@ -9,7 +9,7 @@
 #define MY_HASH_BITS 4
 
 //this file contains the example code for testing original hashtable in linux kernel
-int num_to_test[4] = {1000, 10000, 100000,100000};
+int num_to_test[4] = {100, 1000, 10000,100000};
 
 struct my_node {
 	u32 key;
@@ -33,16 +33,14 @@ void hash_example(void)
 		printk("begin insertion test, size=%d\n", num_to_test[i]);
 		tbegin = ktime_get();
 		for(j=0;j<num_to_test[i];j++){
-			for(k=0;k<2;k++){
-				struct my_node *new = kmalloc(sizeof(struct my_node), GFP_KERNEL);
-				new->value = j * 10 + k;
-				new->key = j * 10 + k;
-				memset(&new->hnode,0,sizeof(struct hlist_node));
-				hash_add(my_hash, &new->hnode, new->key);
-			}
+			struct my_node *new = kmalloc(sizeof(struct my_node), GFP_KERNEL);
+			new->value = j;
+			new->key = j * 10;
+			memset(&new->hnode,0,sizeof(struct hlist_node));
+			hash_add(my_hash, &new->hnode, new->key);
 		}
 		tend = ktime_get();
-		printk("insert, %d) %llu ns \n", 2*num_to_test[i], ktime_to_ns(tend - tbegin));
+		printk("insert, %d) %llu ns \n", num_to_test[i], ktime_to_ns(tend - tbegin));
 		printk("end insertion test\n");
 		printk("begin search test\n");
 		printk("\thash_for_each test\n");
@@ -56,7 +54,7 @@ void hash_example(void)
 			//printk("value=%d, key=%d is in bucket %d\n", nptr->value, nptr->key, bkt);
 		}
 		tend = ktime_get();
-		printk("hash_for_each, %d) %llu ns\n", 2*num_to_test[i], ktime_to_ns(tend - tbegin));
+		printk("hash_for_each, %d) %llu ns\n", num_to_test[i], ktime_to_ns(tend - tbegin));
 		printk("\thash_for_each_possible test\n");
 		tbegin = ktime_get();
 		for(j=0;j<num_to_test[i];j++){
@@ -71,7 +69,7 @@ void hash_example(void)
 			//printk("value=%d, key=%d is in member=30\n", nptr->value, nptr->key);
 		
 		tend = ktime_get();
-		printk("hash_for_each_possible, %d) %llu ns\n", 2*num_to_test[i], ktime_to_ns(tend - tbegin));
+		printk("hash_for_each_possible, %d) %llu ns\n", num_to_test[i], ktime_to_ns(tend - tbegin));
 		printk("end search test\n");
 		printk("begin deletion test");
 		//delete
@@ -81,7 +79,7 @@ void hash_example(void)
 			kfree(nptr);
 		}
 		tend = ktime_get();
-		printk("delete, %d) Time elapsed:%llu", 2*num_to_test[i], ktime_to_ns(tend - tbegin));
+		printk("delete, %d) Time elapsed:%llu", num_to_test[i], ktime_to_ns(tend - tbegin));
 		printk("end deletion test");
 	}
 }
